@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['name', 'email']) &&
+             data.name is string && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 200;
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['title', 'description', 'authorId', 'createdAt']) &&
+             data.authorId == request.auth.uid &&
+             (!('status' in data) || (data.status in ['open', 'in-progress', 'completed']));
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['senderId', 'text', 'createdAt']) &&
+             data.senderId == request.auth.uid &&
+             data.text is string && data.text.size() <= 2000;
+    }
+
+    function isValidCollaborationRequest(data) {
+      return data.keys().hasAll(['projectId', 'senderId', 'recipientId', 'status', 'createdAt']) &&
+             data.senderId == request.auth.uid &&
+             data.status == 'pending';
+    }
+
+    function isProjectMember(projectId) {
+      return isSignedIn() && exists(/databases/$(database)/documents/posts/$(projectId)) && (
+        get(/databases/$(database)/documents/posts/$(projectId)).data.authorId == request.auth.uid ||
+        get(/databases/$(database)/documents/posts/$(projectId)).data.get('collaborators', []).hasAny([request.auth.uid])
+      );
+    }
+
+    // --- Collection Matches ---
+
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming());
+    }
+
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidPost(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && (
+        isOwner(existing().authorId) || 
+        (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'collaborators']))
+      );
+      allow delete: if isSignedIn() && isOwner(existing().authorId);
+    }
+
+    match /posts/{postId}/tasks/{taskId} {
+      allow read, write: if isProjectMember(postId);
+    }
+
+    match /posts/{postId}/resources/{resourceId} {
+      allow read, write: if isProjectMember(postId);
+    }
+
+    match /rooms/{roomId}/messages/{messageId} {
+      allow read: if isSignedIn() && (
+        roomId == 'general' || 
+        request.auth.uid in roomId.split('_') ||
+        (roomId.size() > 5 && roomId[0:5] == 'proj_' && isProjectMember(roomId.split('_')[1]))
+      );
+      allow create: if isSignedIn() && (
+        roomId == 'general' || 
+        request.auth.uid in roomId.split('_') ||
+        (roomId.size() > 5 && roomId[0:5] == 'proj_' && isProjectMember(roomId.split('_')[1]))
+      ) && isValidMessage(incoming()) && (incoming().createdAt == request.time || incoming().createdAt == null);
+      allow delete: if isSignedIn() && isOwner(existing().senderId);
+    }
+
+    match /notes/{noteId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && incoming().authorId == request.auth.uid && incoming().createdAt == request.time;
+      allow delete: if isSignedIn() && isOwner(existing().authorId);
+    }
+
+    match /questions/{questionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && incoming().authorId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isOwner(existing().authorId);
+      allow delete: if isSignedIn() && isOwner(existing().authorId);
+    }
+
+    match /questions/{questionId}/answers/{answerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && incoming().authorId == request.auth.uid && incoming().createdAt == request.time;
+      allow delete: if isSignedIn() && isOwner(existing().authorId);
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().recipientId != request.auth.uid;
+      allow update: if isSignedIn() && resource.data.recipientId == request.auth.uid && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+      allow delete: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+    }
+
+    match /collaborationRequests/{requestId} {
+      allow get: if isSignedIn() && (resource.data.recipientId == request.auth.uid || resource.data.senderId == request.auth.uid);
+      allow list: if isSignedIn() && (resource.data.recipientId == request.auth.uid || resource.data.senderId == request.auth.uid);
+      allow create: if isSignedIn() && isValidCollaborationRequest(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && (
+        (resource.data.recipientId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status']))
+      );
+      allow delete: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
+    }
+  }
+}
