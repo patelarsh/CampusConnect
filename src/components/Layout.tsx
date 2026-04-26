@@ -53,7 +53,7 @@ export default function Layout() {
     <>
       <div className="p-6 shrink-0">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <img src="https://ashishvidhyalay.com/ADM/ConnectSpace.png" width="150px" alt="CampusConnect" />
+          <img src="https://ashishvidhyalay.com/ADM/ConnectSpace.png" width="150px" alt="CampusSpace" />
         </Link>
       </div>
 
@@ -265,7 +265,7 @@ export default function Layout() {
           </motion.div>
           
           <footer className="p-8 text-center text-slate-400 text-sm">
-            CampusConnect Platform • Developed By Patel Arsh
+            CampusSpace Platform • Developed By Patel Arsh
           </footer>
         </main>
       </div>

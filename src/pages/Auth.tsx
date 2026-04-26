@@ -125,7 +125,7 @@ export default function Auth() {
             to="/"
             className="flex items-center gap-2 mb-8 group"
           >
-            <img src="https://ashishvidhyalay.com/ADM/ConnectSpaceWhite.png" width="160px" alt="CampusConnect" />
+            <img src="https://ashishvidhyalay.com/ADM/ConnectSpaceWhite.png" width="160px" alt="CampusSpace" />
           </Link>
 
           <motion.h1

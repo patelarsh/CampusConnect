@@ -15,7 +15,7 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <img src="https://ashishvidhyalay.com/ADM/ConnectSpace.png" width="150px" alt="CampusConnect" />
+            <img src="https://ashishvidhyalay.com/ADM/ConnectSpace.png" width="150px" alt="CampusSpace" />
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
@@ -135,7 +135,7 @@ export default function Home() {
             transition={{ delay: 0.2 }}
             className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            CampusConnect is the decentralized hub for students to find project partners, 
+            CampusSpace is the decentralized hub for students to find project partners, 
             share high-quality notes, and solve doubts in real-time.
           </motion.p>
 
@@ -257,7 +257,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
             <div className="max-w-xs">
               <Link to="/" className="flex items-center gap-2.5 mb-6">
-                <img src="https://ashishvidhyalay.com/ADM/ConnectSpace.png" width="150px" alt="CampusConnect" />
+                <img src="https://ashishvidhyalay.com/ADM/ConnectSpace.png" width="150px" alt="CampusSpace" />
               </Link>
               <p className="text-slate-500 text-sm leading-relaxed mb-6 font-medium">
                 The leading platform for students to collaborate, share resources, and help one another excel in their academic and creative pursuits.
@@ -297,7 +297,7 @@ export default function Home() {
           </div>
 
           <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-            <p>© 2026 CampusConnect. Created by Patel Arsh</p>
+            <p>© 2026 CampusSpace. Created by Patel Arsh</p>
             <div className="flex items-center gap-6">
               <span className="flex items-center gap-1.5"><Shield size={14} /> Encrypted Platform</span>
               <span className="flex items-center gap-1.5"><Star size={14} className="fill-amber-400 text-amber-400" /> Rated 4.9/5</span>
