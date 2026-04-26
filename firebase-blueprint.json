@@ -1,0 +1,215 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Student profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "collegeName": { "type": "string" },
+        "semester": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "bio": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "isBanned": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "collegeName"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Project recruitment post",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "collegeName": { "type": "string" },
+        "requiredSkills": { "type": "array", "items": { "type": "string" } },
+        "authorId": { "type": "string" },
+        "collaborators": { "type": "array", "items": { "type": "string" } },
+        "meetingHosts": { "type": "array", "items": { "type": "string" } },
+        "activeMeeting": { "type": "object", "properties": { "hostId": { "type": "string" }, "startTime": { "type": "string", "format": "date-time" }, "roomName": { "type": "string" } } },
+        "status": { "type": "string", "enum": ["open", "in-progress", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "authorId", "collegeName"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Chat message",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "text"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "Shared learning material",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "subject": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "subject", "fileUrl", "authorId"]
+    },
+    "ProjectNote": {
+      "title": "ProjectNote",
+      "description": "Shared note in project workspace",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "authorName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "authorName"]
+    },
+    "Question": {
+      "title": "Question",
+      "description": "Student doubt or query",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "authorId": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "body", "authorId"]
+    },
+    "Answer": {
+      "title": "Answer",
+      "description": "Answer to a doubt",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["text", "authorId"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification",
+      "type": "object",
+      "properties": {
+        "recipientId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "type": { "type": "string", "enum": ["message", "application", "reply", "collab_request", "collab_accept"] },
+        "relatedId": { "type": "string" },
+        "text": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["recipientId", "senderId", "type", "text", "read"]
+    },
+    "CollaborationRequest": {
+      "title": "CollaborationRequest",
+      "description": "Request to join a project",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "projectTitle": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "senderId", "recipientId", "status"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Project task or priority",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["todo", "in-progress", "done"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "assignedTo": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "status"]
+    },
+    "ProjectResource": {
+      "title": "ProjectResource",
+      "description": "Shared file or image link in project",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string" },
+        "type": { "type": "string", "enum": ["file", "image", "link"] },
+        "uploadedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "url", "type"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/admins/{userId}": {
+      "schema": { "type": "object", "properties": { "email": { "type": "string" } } },
+      "description": "System administrators"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Project listings"
+    },
+    "/posts/{postId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Project workspace tasks"
+    },
+    "/posts/{postId}/resources/{resourceId}": {
+      "schema": "ProjectResource",
+      "description": "Project workspace shared files"
+    },
+    "/posts/{postId}/presence/{userId}": {
+      "schema": { "type": "object", "properties": { "lastSeen": { "type": "string", "format": "date-time" } } },
+      "description": "Collaborator presence"
+    },
+    "/posts/{postId}/readState/{userId}": {
+      "schema": { "type": "object", "properties": { "lastRead": { "type": "string", "format": "date-time" } } },
+      "description": "User's last read timestamp"
+    },
+    "/posts/{postId}/notes/{noteId}": {
+      "schema": "ProjectNote",
+      "description": "Project workspace shared notes"
+    },
+    "/rooms/{roomId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat messages in specific rooms"
+    },
+    "/notes/{noteId}": {
+      "schema": "Note",
+      "description": "Shared notes"
+    },
+    "/questions/{questionId}": {
+      "schema": "Question",
+      "description": "Study doubts"
+    },
+    "/questions/{questionId}/answers/{answerId}": {
+      "schema": "Answer",
+      "description": "Answers to study doubts"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications"
+    },
+    "/collaborationRequests/{requestId}": {
+      "schema": "CollaborationRequest",
+      "description": "Project collaboration requests"
+    }
+  }
+}

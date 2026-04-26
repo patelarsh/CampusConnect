@@ -1,0 +1,221 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isNotBanned() {
+      return isSignedIn() && (
+        !exists(/databases/$(database)/documents/users/$(request.auth.uid)) || 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('isBanned', false) == false
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function hasProfile() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getCollegeName() {
+      return hasProfile() ? getUser().data.get('collegeName', '') : '';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidUser(data) {
+      return (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 200)) &&
+             (!('collegeName' in data) || (data.collegeName is string && data.collegeName.size() <= 200)) &&
+             (!('semester' in data) || (data.semester is string)) &&
+             (!('department' in data) || (data.department is string)) &&
+             (!('skills' in data) || (data.skills is list)) &&
+             (!('bio' in data) || (data.bio is string)) &&
+             (!('photoURL' in data) || (data.photoURL is string)) &&
+             (!('createdAt' in data) || (data.createdAt is timestamp)) &&
+             (!('updatedAt' in data) || (data.updatedAt is timestamp));
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['title', 'description', 'authorId', 'createdAt']) &&
+             data.authorId == request.auth.uid &&
+             (!('collegeName' in data) || (data.collegeName is string && data.collegeName.size() <= 200)) &&
+             (!('status' in data) || (data.status in ['open', 'in-progress', 'completed'])) &&
+             (!('semester' in data) || (data.semester is string)) &&
+             (!('department' in data) || (data.department is string));
+    }
+
+    function canViewProject(projectData) {
+      return isSignedIn() && (
+        isAdmin() ||
+        projectData.authorId == request.auth.uid ||
+        projectData.get('collaborators', []).hasAny([request.auth.uid]) ||
+        (hasProfile() && projectData.get('collegeName', '') == getCollegeName())
+      );
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['senderId', 'text', 'createdAt']) &&
+             data.senderId == request.auth.uid &&
+             data.text is string && data.text.size() <= 2000;
+    }
+
+    function isValidCollaborationRequest(data) {
+      return data.keys().hasAll(['projectId', 'senderId', 'recipientId', 'status', 'createdAt']) &&
+             data.senderId == request.auth.uid &&
+             data.status == 'pending';
+    }
+
+    function isProjectMember(projectId) {
+      return isSignedIn() && exists(/databases/$(database)/documents/posts/$(projectId)) && (
+        get(/databases/$(database)/documents/posts/$(projectId)).data.authorId == request.auth.uid ||
+        get(/databases/$(database)/documents/posts/$(projectId)).data.get('collaborators', []).hasAny([request.auth.uid])
+      );
+    }
+
+    // --- Collection Matches ---
+
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if (isAdmin() || (isOwner(userId) && isNotBanned())) && 
+                    isValidUser(incoming());
+    }
+
+    match /admins/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.token.email == 'patelarsh.aps@gmail.com';
+    }
+
+    match /posts/{postId} {
+      allow get: if isSignedIn() && canViewProject(resource.data);
+      allow list: if isSignedIn(); // Filtered by collegeName in client
+      allow create: if isNotBanned() && isValidPost(incoming()) && 
+                    incoming().createdAt == request.time &&
+                    (!('collegeName' in incoming()) || (hasProfile() && incoming().collegeName == getCollegeName()));
+      allow update: if isNotBanned() && (
+        // 1. Project Owner (Admin) can update everything
+        isOwner(existing().authorId) || 
+        // 2. Authorized non-author host can manage meetings
+        (
+          existing().get('meetingHosts', []).hasAny([request.auth.uid]) && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['activeMeeting', 'meetingHosts'])
+        )
+      ) && canViewProject(existing());
+      allow delete: if isNotBanned() && isOwner(existing().authorId);
+    }
+
+    match /posts/{postId}/tasks/{taskId} {
+      allow read, write: if isSignedIn(); // Simplified for member checks within client
+    }
+
+    match /posts/{postId}/signaling/{signalId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /posts/{postId}/presence/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(uid) && isNotBanned();
+    }
+
+    match /posts/{postId}/resources/{resourceId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /posts/{postId}/notes/{noteId} {
+      allow read, write: if isSignedIn();
+    }
+
+    match /rooms/{roomId} {
+      allow read: if isSignedIn();
+      
+      match /messages/{messageId} {
+        allow get: if isSignedIn();
+        allow list: if isSignedIn();
+        allow create: if isNotBanned() && isValidMessage(incoming()) && (incoming().createdAt == request.time || incoming().createdAt == null);
+        allow delete: if isNotBanned() && isOwner(existing().senderId);
+      }
+
+      match /typing/{userId} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(userId);
+      }
+
+      match /readState/{userId} {
+        allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+        allow write: if isNotBanned() && isOwner(userId);
+      }
+    }
+
+    match /notes/{noteId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn() && (resource.data.collegeName == getCollegeName() || isOwner(resource.data.authorId));
+      allow create: if isNotBanned() && incoming().authorId == request.auth.uid && incoming().createdAt == request.time;
+      allow delete: if isNotBanned() && isOwner(existing().authorId);
+    }
+
+    match /questions/{questionId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn() && (resource.data.collegeName == getCollegeName() || isOwner(resource.data.authorId));
+      allow create: if isNotBanned() && incoming().authorId == request.auth.uid && incoming().createdAt == request.time;
+      allow update: if isNotBanned() && (
+        isOwner(existing().authorId) || 
+        (incoming().diff(existing()).affectedKeys().hasOnly(['upvotes', 'upvotedBy']))
+      );
+      allow delete: if isNotBanned() && isOwner(existing().authorId);
+    }
+
+    match /questions/{questionId}/answers/{answerId} {
+      allow read: if isSignedIn();
+      allow create: if isNotBanned() && incoming().authorId == request.auth.uid && incoming().createdAt == request.time;
+      allow delete: if isNotBanned() && isOwner(existing().authorId);
+    }
+
+    match /notifications/{notificationId} {
+      allow get, list: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+      allow create: if isSignedIn() && incoming().recipientId != request.auth.uid;
+      allow update: if isSignedIn() && resource.data.recipientId == request.auth.uid && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+      allow delete: if isSignedIn() && resource.data.recipientId == request.auth.uid;
+    }
+
+    match /collaborationRequests/{requestId} {
+      allow get, list: if isSignedIn() && (resource.data.recipientId == request.auth.uid || resource.data.senderId == request.auth.uid);
+      allow create: if isSignedIn() && isValidCollaborationRequest(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && (
+        (resource.data.recipientId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status']))
+      );
+      allow delete: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.recipientId == request.auth.uid);
+    }
+  }
+}

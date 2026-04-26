@@ -1,0 +1,6 @@
+{
+  "name": "CampusConnect",
+  "description": "CampusConnect: The all-in-one responsive platform for students to find project partners, share notes, and solve doubts in real-time within their campus.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"],
+  "majorCapabilities": []
+}
