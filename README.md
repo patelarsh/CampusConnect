@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎓 CampusConnect
+# 🎓 CampuSpace
 
 **The all-in-one platform for students to find project partners, share notes, and solve doubts — all within their campus.**
 
