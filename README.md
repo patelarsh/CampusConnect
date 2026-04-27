@@ -2,48 +2,46 @@
 
 # 🎓 CampusConnect
 
-**An AI-powered campus companion built for college students.**
+**The all-in-one platform for students to find project partners, share notes, and solve doubts — all within their campus.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-campus--connect--phi--three.vercel.app-blue?style=for-the-badge&logo=vercel)](https://campus-connect-phi-three.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://campuspace.patelarsh.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-99.5%25-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
-[![Gemini AI](https://img.shields.io/badge/Gemini-AI-8E75B2?style=for-the-badge&logo=google)](https://ai.google.dev/)
 
 </div>
 
 ---
 
-## ✨ Overview
+## 📖 About
 
-CampusConnect is a full-stack web application designed to help college students stay organized, connected, and informed — powered by Google Gemini AI. Whether it's tracking events, managing tasks, or getting instant answers, CampusConnect brings everything campus-related into one place.
+CampusConnect (also known as **CampusSpace**) is a responsive web platform built for college students. It brings your entire campus community together — making it easy to collaborate on projects, exchange study materials, and get real-time answers to your doubts, all within your campus network.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-- 🤖 **AI Assistant** — Gemini-powered chat for campus queries and productivity
-- 🔐 **Authentication** — Secure login & sign-up via Firebase Auth
-- 🗃️ **Real-time Database** — Live data sync with Firestore
-- 📅 **Date Management** — Schedule and track campus events with a date picker
-- 🌐 **Routing** — Smooth multi-page navigation with React Router v7
-- 🎨 **Modern UI** — Styled with Tailwind CSS v4 + Framer Motion animations
-- ⚡ **Fast Dev Experience** — Vite + Express backend with TypeScript throughout
+- 🤝 **Find Project Partners** — Connect with fellow students who share your interests and skills
+- 📝 **Share Notes** — Upload, browse, and download study materials across subjects
+- 💬 **Solve Doubts in Real-time** — Ask questions and get answers from your campus community instantly
+- 🔐 **Secure Authentication** — Login & signup powered by Firebase Auth
+- 📅 **Event Scheduling** — Track and manage campus events with a built-in date picker
+- 📍 **Location & Media Aware** — Supports camera, microphone, and geolocation for richer interactions
+- 🎨 **Modern UI** — Clean, responsive design with Tailwind CSS and smooth animations via Framer Motion
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer      | Technology                                      |
-|------------|-------------------------------------------------|
-| Frontend   | React 19, TypeScript, Vite, Tailwind CSS v4     |
-| Backend    | Express.js, Node.js, TSX                        |
-| Database   | Firebase Firestore                              |
-| Auth       | Firebase Authentication                         |
-| AI         | Google Gemini (`@google/genai`)                 |
-| Animations | Framer Motion (`motion`)                        |
-| Routing    | React Router DOM v7                             |
-| Deployment | Vercel                                          |
+| Layer      | Technology                                  |
+|------------|---------------------------------------------|
+| Frontend   | React 19, TypeScript, Vite, Tailwind CSS v4 |
+| Backend    | Express.js, Node.js, TSX                    |
+| Database   | Firebase Firestore                          |
+| Auth       | Firebase Authentication                     |
+| Animations | Framer Motion (`motion`)                    |
+| Routing    | React Router DOM v7                         |
+| Deployment | Vercel                                      |
 
 ---
 
@@ -51,9 +49,8 @@ CampusConnect is a full-stack web application designed to help college students 
 
 ### Prerequisites
 
-- **Node.js** v18+ installed
-- A **Gemini API Key** from [Google AI Studio](https://aistudio.google.com/)
-- A **Firebase project** with Firestore enabled
+- **Node.js** v18+
+- A **Firebase project** with Firestore and Authentication enabled
 
 ### Installation
 
@@ -71,10 +68,9 @@ cp .env.example .env.local
 
 ### Environment Variables
 
-Open `.env.local` and fill in your credentials:
+Open `.env.local` and fill in your Firebase credentials:
 
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
@@ -89,28 +85,28 @@ VITE_FIREBASE_APP_ID=your_app_id
 npm run dev
 ```
 
-The app will start on `http://localhost:5173` (or the port configured in `server.ts`).
+The app will be available at `http://localhost:5173`.
 
 ---
 
 ## 📜 Available Scripts
 
-| Command         | Description                          |
-|-----------------|--------------------------------------|
-| `npm run dev`   | Start the development server         |
-| `npm run build` | Build for production                 |
+| Command           | Description                        |
+|-------------------|------------------------------------|
+| `npm run dev`     | Start the development server       |
+| `npm run build`   | Build for production               |
 | `npm run preview` | Preview the production build       |
-| `npm run lint`  | Type-check with TypeScript           |
-| `npm run clean` | Remove the `dist` folder             |
+| `npm run lint`    | Type-check with TypeScript         |
+| `npm run clean`   | Remove the `dist` folder           |
 
 ---
 
 ## 🔥 Firebase Setup
 
-1. Create a project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable **Firestore** and **Authentication** (Email/Password)
-3. Copy your Firebase config into `.env.local`
-4. Deploy Firestore rules:
+1. Go to [Firebase Console](https://console.firebase.google.com/) and create a project
+2. Enable **Firestore Database** and **Authentication** (Email/Password)
+3. Copy your config values into `.env.local`
+4. Deploy security rules:
 
 ```bash
 firebase deploy --only firestore:rules
@@ -120,17 +116,14 @@ firebase deploy --only firestore:rules
 
 ## 🌍 Deployment
 
-This project is deployed on **Vercel**. To deploy your own:
+Deployed on **Vercel**. To deploy your own instance:
 
 ```bash
-# Install Vercel CLI
 npm i -g vercel
-
-# Deploy
 vercel
 ```
 
-Make sure to add all environment variables in your Vercel project settings.
+Add all environment variables in your Vercel project dashboard under **Settings → Environment Variables**.
 
 ---
 
@@ -138,14 +131,15 @@ Make sure to add all environment variables in your Vercel project settings.
 
 ```
 CampusConnect/
-├── src/                    # React frontend source
-├── server.ts               # Express backend server
-├── index.html              # HTML entry point
-├── vite.config.ts          # Vite configuration
-├── tsconfig.json           # TypeScript config
-├── firebase-blueprint.json # Firebase project config
-├── firestore.rules         # Firestore security rules
-├── .env.example            # Environment variable template
+├── src/                      # React frontend source
+├── server.ts                 # Express backend server
+├── index.html                # HTML entry point
+├── vite.config.ts            # Vite configuration
+├── tsconfig.json             # TypeScript config
+├── firebase-blueprint.json   # Firebase project config
+├── firestore.rules           # Firestore security rules
+├── metadata.json             # App metadata & permissions
+├── .env.example              # Environment variable template
 └── package.json
 ```
 
@@ -153,10 +147,10 @@ CampusConnect/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how to get started:
+Contributions are welcome!
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
+2. Create your branch: `git checkout -b feature/your-feature`
 3. Commit your changes: `git commit -m 'Add your feature'`
 4. Push to the branch: `git push origin feature/your-feature`
 5. Open a Pull Request
